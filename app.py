@@ -73,13 +73,11 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
 # Function to load the model (with caching for performance)
 @st.cache_resource
 def load_age_gender_model():
     try:
         model_path = "Age_Sex_Detection.h5"
-
         model = legacy_h5_format.load_model_from_hdf5(
             model_path, custom_objects={"mae": "mae"}
         )
@@ -88,58 +86,36 @@ def load_age_gender_model():
         st.error(f"Error loading model: {e}")
         return None
 
-
 # Function to preprocess the image
 def preprocess_image(uploaded_image):
-    # Convert to RGB if needed
     if uploaded_image.mode != "RGB":
         uploaded_image = uploaded_image.convert("RGB")
-
-    # Resize to 48x48
     image = uploaded_image.resize((48, 48))
-
-    # Convert to numpy array and normalize
     image_array = np.array(image) / 255.0
-
-    # Expand dimensions for model input
     return np.expand_dims(image_array, axis=0)
-
 
 # Function to make prediction
 def predict_age_gender(model, image_array):
     try:
         predictions = model.predict(image_array)
-
-        # Get age prediction (assuming age is second output)
-        predicted_age = int(np.round(predictions[1][0]))
-
-        # Get gender prediction (assuming gender is first output)
-        gender_prob = predictions[0][0]
+        predicted_age = int(np.round(predictions[1][0][0]))  # scalar fix
+        gender_prob = predictions[0][0][0]  # scalar fix
         predicted_gender = "Female" if gender_prob > 0.5 else "Male"
-        gender_confidence = (
-            gender_prob if predicted_gender == "Female" else 1 - gender_prob
-        )
-
+        gender_confidence = gender_prob if predicted_gender == "Female" else 1 - gender_prob
         return predicted_age, predicted_gender, float(gender_confidence)
     except Exception as e:
         st.error(f"Error during prediction: {e}")
         return None, None, None
-
 
 # Helper function to convert hex color to RGB
 def hex_to_rgb(hex_color):
     hex_color = hex_color.lstrip("#")
     return tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
 
-
 # Main function
 def main():
-    # Header
-    st.markdown(
-        '<div class="main-header">Age and Gender Detector</div>', unsafe_allow_html=True
-    )
+    st.markdown('<div class="main-header">Age and Gender Detector</div>', unsafe_allow_html=True)
 
-    # Load model
     with st.spinner("Loading model... This may take a moment."):
         model = load_age_gender_model()
 
@@ -147,7 +123,6 @@ def main():
         st.warning("Please make sure the model file exists at the specified path.")
         return
 
-    # File uploader - Allow multiple files
     st.markdown('<div class="sub-header">Upload Images</div>', unsafe_allow_html=True)
     uploaded_files = st.file_uploader(
         "Choose one or more images...",
@@ -155,49 +130,31 @@ def main():
         accept_multiple_files=True,
     )
 
-    # Process button
-    if uploaded_files and st.button("Detect Age & Gender"):
+    if uploaded_files and st.button("Detect Age & Gender", key="detect_with_files"):
         with st.spinner("Analyzing images..."):
-            # Process each image
             for i, uploaded_file in enumerate(uploaded_files):
-                # Create a container for each image and its results
                 with st.container():
-                    st.markdown(
-                        f'<div class="image-container">', unsafe_allow_html=True
-                    )
-
-                    # Display image number
+                    st.markdown('<div class="image-container">', unsafe_allow_html=True)
                     st.markdown(f"<h3>Image {i+1}</h3>", unsafe_allow_html=True)
-
-                    # Create two columns for image and results
                     col1, col2 = st.columns([1, 1])
 
-                    # Display uploaded image
                     image = Image.open(uploaded_file)
                     col1.image(
                         image,
                         caption=f"Image {i+1}: {uploaded_file.name}",
-                        use_column_width=True,
+                        use_container_width=True,  # updated
                     )
 
-                    # Process image
                     processed_image = preprocess_image(image)
                     age, gender, confidence = predict_age_gender(model, processed_image)
 
                     if age is not None and gender is not None:
-                        # Display results with nice formatting
-                        col2.markdown(
-                            '<div class="sub-header">Results:</div>',
-                            unsafe_allow_html=True,
-                        )
-
-                        # Age result
+                        col2.markdown('<div class="sub-header">Results:</div>', unsafe_allow_html=True)
                         col2.markdown(
                             f'<div class="result-text" style="background-color: rgba(37, 99, 235, 0.1);">Age: {age}</div>',
                             unsafe_allow_html=True,
                         )
 
-                        # Gender result with confidence
                         gender_color = "#9F7AEA" if gender == "Female" else "#4F46E5"
                         col2.markdown(
                             f'<div class="result-text" style="background-color: rgba({", ".join(map(str, hex_to_rgb(gender_color)))}, 0.1);">'
@@ -210,20 +167,13 @@ def main():
                         col2.error("Failed to process this image")
 
                     st.markdown("</div>", unsafe_allow_html=True)
-
-                    # Add a separator between images
                     if i < len(uploaded_files) - 1:
                         st.markdown("<hr>", unsafe_allow_html=True)
 
-    # Show message if no files uploaded
-    elif st.button("Detect Age & Gender"):
+    elif st.button("Detect Age & Gender", key="detect_no_files"):
         st.info("Please upload one or more images first.")
 
-    # Footer
-    st.markdown(
-        '<div class="app-footer">Powered by NULLCLASS🧑‍💻</div>', unsafe_allow_html=True
-    )
-
+    st.markdown('<div class="app-footer">Powered by NULLCLASS🧑‍💻</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
