@@ -78,7 +78,8 @@ st.markdown(
 @st.cache_resource
 def load_age_gender_model():
     try:
-        model_path = r"C:\Learning\age_gender_code\Age_Sex_Detection.h5"
+        model_path = "Age_Sex_Detection.h5"
+
         model = legacy_h5_format.load_model_from_hdf5(
             model_path, custom_objects={"mae": "mae"}
         )
