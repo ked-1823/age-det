@@ -1,0 +1,38 @@
+# Virtual environments
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor folders
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Streamlit cache folder (optional)
+.streamlit/
+
+# Temporary or backup files
+*.bak
+*.tmp
+
+# Large model/data files (optional, if you want to ignore them)
+# *.h5
+# *.ckpt
+# /data/
