@@ -1,8 +1,14 @@
+# Streamlit for the web app
 streamlit==1.30.0
+
+# ML and data libraries
 tensorflow==2.13.0
-opencv-python==4.8.0.74
 numpy==1.26.0
+opencv-python==4.8.0.74
 matplotlib==3.8.0
+
+# Packages needed by Streamlit for logging and rich formatting
 pygments==2.19.2
 markdown-it-py==4.0.0
+mdurl==0.1.2
 rich==14.1.0
