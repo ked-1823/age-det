@@ -130,48 +130,49 @@ def main():
         accept_multiple_files=True,
     )
 
-    if uploaded_files and st.button("Detect Age & Gender", key="detect_with_files"):
-        with st.spinner("Analyzing images..."):
-            for i, uploaded_file in enumerate(uploaded_files):
-                with st.container():
-                    st.markdown('<div class="image-container">', unsafe_allow_html=True)
-                    st.markdown(f"<h3>Image {i+1}</h3>", unsafe_allow_html=True)
-                    col1, col2 = st.columns([1, 1])
+    # Single button for detection
+    if st.button("Detect Age & Gender", key="detect_button"):
+        if uploaded_files:
+            with st.spinner("Analyzing images..."):
+                for i, uploaded_file in enumerate(uploaded_files):
+                    with st.container():
+                        st.markdown('<div class="image-container">', unsafe_allow_html=True)
+                        st.markdown(f"<h3>Image {i+1}</h3>", unsafe_allow_html=True)
+                        col1, col2 = st.columns([1, 1])
 
-                    image = Image.open(uploaded_file)
-                    col1.image(
-                        image,
-                        caption=f"Image {i+1}: {uploaded_file.name}",
-                        use_container_width=True,  # updated
-                    )
-
-                    processed_image = preprocess_image(image)
-                    age, gender, confidence = predict_age_gender(model, processed_image)
-
-                    if age is not None and gender is not None:
-                        col2.markdown('<div class="sub-header">Results:</div>', unsafe_allow_html=True)
-                        col2.markdown(
-                            f'<div class="result-text" style="background-color: rgba(37, 99, 235, 0.1);">Age: {age}</div>',
-                            unsafe_allow_html=True,
+                        image = Image.open(uploaded_file)
+                        col1.image(
+                            image,
+                            caption=f"Image {i+1}: {uploaded_file.name}",
+                            use_container_width=True,
                         )
 
-                        gender_color = "#9F7AEA" if gender == "Female" else "#4F46E5"
-                        col2.markdown(
-                            f'<div class="result-text" style="background-color: rgba({", ".join(map(str, hex_to_rgb(gender_color)))}, 0.1);">'
-                            f"Gender: {gender}<br>"
-                            f"<small>Confidence: {confidence:.2%}</small>"
-                            f"</div>",
-                            unsafe_allow_html=True,
-                        )
-                    else:
-                        col2.error("Failed to process this image")
+                        processed_image = preprocess_image(image)
+                        age, gender, confidence = predict_age_gender(model, processed_image)
 
-                    st.markdown("</div>", unsafe_allow_html=True)
-                    if i < len(uploaded_files) - 1:
-                        st.markdown("<hr>", unsafe_allow_html=True)
+                        if age is not None and gender is not None:
+                            col2.markdown('<div class="sub-header">Results:</div>', unsafe_allow_html=True)
+                            col2.markdown(
+                                f'<div class="result-text" style="background-color: rgba(37, 99, 235, 0.1);">Age: {age}</div>',
+                                unsafe_allow_html=True,
+                            )
 
-    elif st.button("Detect Age & Gender", key="detect_no_files"):
-        st.info("Please upload one or more images first.")
+                            gender_color = "#9F7AEA" if gender == "Female" else "#4F46E5"
+                            col2.markdown(
+                                f'<div class="result-text" style="background-color: rgba({", ".join(map(str, hex_to_rgb(gender_color)))}, 0.1);">'
+                                f"Gender: {gender}<br>"
+                                f"<small>Confidence: {confidence:.2%}</small>"
+                                f"</div>",
+                                unsafe_allow_html=True,
+                            )
+                        else:
+                            col2.error("Failed to process this image")
+
+                        st.markdown("</div>", unsafe_allow_html=True)
+                        if i < len(uploaded_files) - 1:
+                            st.markdown("<hr>", unsafe_allow_html=True)
+        else:
+            st.info("Please upload one or more images first.")
 
     st.markdown('<div class="app-footer">Powered by NULLCLASS🧑‍💻</div>', unsafe_allow_html=True)
 
